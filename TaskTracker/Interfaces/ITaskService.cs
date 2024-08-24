@@ -8,11 +8,11 @@ namespace TaskTracker.Interfaces
 {
     public interface ITaskService
     {
-        Task<IEnumerable<Models.Task>> GetAllTasks();
+        Task<List<Models.Task>> GetAllTasks();
         Task<bool> AddNewTask(string description);
         Task<bool> UpdateTask(Models.Task task);
         Task<bool> DeleteTask(int id);
         Task<bool> SetStatus(Models.Task task);
-        Task<IEnumerable<Models.Task>> GetTaskByStatus(int status);
+        Task<List<Models.Task>> GetTaskByStatus(int status);
     }
 }

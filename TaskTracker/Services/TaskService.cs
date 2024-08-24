@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using TaskTracker.Interfaces;
+using TaskTracker.Models;
 
 namespace TaskTracker.Services
 {
@@ -48,12 +50,36 @@ namespace TaskTracker.Services
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Models.Task>> GetAllTasks()
+        public Task<List<Models.Task>> GetAllTasks()
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (!File.Exists(FilePath))
+                {
+                    return System.Threading.Tasks.Task.FromResult(new List<Models.Task>());
+                }
+
+                string jsonString = File.ReadAllText(FilePath);
+
+                if (!string.IsNullOrEmpty(jsonString))
+                {
+                    List<Models.Task> tasks = JsonSerializer.Deserialize<List<Models.Task>>(jsonString);
+                    return System.Threading.Tasks.Task.FromResult(tasks ?? []);
+                }
+
+                else
+                {
+                    return System.Threading.Tasks.Task.FromResult(new List<Models.Task>());
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
-        public Task<IEnumerable<Models.Task>> GetTaskByStatus(int status)
+        public Task<List<Models.Task>> GetTaskByStatus(int status)
         {
             throw new NotImplementedException();
         }
