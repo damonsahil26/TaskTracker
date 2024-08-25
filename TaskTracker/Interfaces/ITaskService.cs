@@ -14,5 +14,6 @@ namespace TaskTracker.Interfaces
         Task<bool> DeleteTask(int id);
         Task<bool> SetStatus(Models.AppTask task);
         Task<List<Models.AppTask>> GetTaskByStatus(int status);
+        List<string> GetAllHelpCommands();
     }
 }
