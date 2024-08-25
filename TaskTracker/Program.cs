@@ -34,9 +34,15 @@ while (true)
         case "help":
             PrintHelpCommands();
             break;
+
         case "add":
             AddNewTask();
             break;
+
+        case "delete":
+            DeleteTask();
+            break;
+
         case "exit":
             exit = true;
             break;
@@ -52,19 +58,45 @@ while (true)
 
 }
 
-void AddNewTask()
+void DeleteTask()
 {
-    if (commands.Count != 2 || string.IsNullOrEmpty(commands[1]))
+    if (!IsUserInputValid(commands, 2))
+    {
+        return;
+    }
+
+    Int32.TryParse(commands[1], out int id);
+
+    if (id == 0)
     {
         Utility.PrintErrorMessage("Wrong command! Try again.");
         Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
         return;
     }
 
+    var result = _taskService?.DeleteTask(id).Result;
+
+    if (result != null && result.Value)
+    {
+        Utility.PrintInfoMessage($"Task deleted successfully with Id : {id}");
+    }
+    else
+    {
+        Utility.PrintInfoMessage($"Task with Id : {id}, does not exist!");
+    }
+}
+
+void AddNewTask()
+{
+    if(!IsUserInputValid(commands, 2))
+    {
+        return;
+    }
+
     var taskAdded = _taskService?.AddNewTask(commands[1]);
 
     if (taskAdded != null && taskAdded.Result != 0)
-         Utility.PrintInfoMessage($"Task added successfully with Id : {taskAdded.Result}!");
+        Utility.PrintInfoMessage($"Task added successfully with Id : {taskAdded.Result}");
     else
         Utility.PrintInfoMessage("Task not saved!");
 }
@@ -82,8 +114,20 @@ void PrintHelpCommands()
     }
 }
 
- static void ConfigureServices(IServiceCollection services)
+static void ConfigureServices(IServiceCollection services)
 {
     // Register services here
     services.AddSingleton<ITaskService, TaskService>();
+}
+
+static bool IsUserInputValid(List<string> commands , int parameterRequired)
+{
+    if (commands.Count != parameterRequired || string.IsNullOrEmpty(commands[1]))
+    {
+        Utility.PrintErrorMessage("Wrong command! Try again.");
+        Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
+        return false;
+    }
+
+    return true;
 }

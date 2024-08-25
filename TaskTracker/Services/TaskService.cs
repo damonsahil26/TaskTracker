@@ -77,7 +77,45 @@ namespace TaskTracker.Services
 
         public Task<bool> DeleteTask(int id)
         {
-            throw new NotImplementedException();
+            if (!File.Exists(FilePath))
+            {
+                return Task.FromResult(false);
+            }
+
+            var tasksFromJson = GetTasksFromJson();
+
+            if (tasksFromJson.Result.Count > 0)
+            {
+                var taskToBeDeleted = tasksFromJson.Result
+                    .Where(x => x.Id == id)
+                    .SingleOrDefault();
+
+                if (taskToBeDeleted != null)
+                {
+                    tasksFromJson.Result.Remove(taskToBeDeleted);
+                    UpdateJsonFile(tasksFromJson);
+                    return Task.FromResult(true);
+                }
+            }
+
+            return Task.FromResult(false);
+        }
+
+        private static void UpdateJsonFile(Task<List<AppTask>> tasksFromJson)
+        {
+            string updatedAppTasks = JsonSerializer.Serialize<List<AppTask>>(tasksFromJson.Result);
+            File.WriteAllText(FilePath, updatedAppTasks);
+        }
+
+        private static Task<List<AppTask>> GetTasksFromJson()
+        {
+            string tasksFromJsonFileString = File.ReadAllText(FilePath);
+            if (!string.IsNullOrEmpty(tasksFromJsonFileString))
+            {
+                return Task.FromResult(JsonSerializer.Deserialize<List<AppTask>>(tasksFromJsonFileString) ?? []);
+            }
+
+            return Task.FromResult(new List<AppTask>());
         }
 
         public Task<List<Models.AppTask>> GetAllTasks()
