@@ -7,7 +7,7 @@ using TaskTracker.Enums;
 
 namespace TaskTracker.Models
 {
-    public class Task
+    public class AppTask
     {
         public int Id { get; set; }
         public string Description { get; set; } = string.Empty;

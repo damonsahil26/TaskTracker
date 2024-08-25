@@ -1,2 +1,7 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+﻿using TaskTracker.Utilities;
+
+Utility.PrintInfoMessage("Hello, Welcome to Task Tracker!");
+Utility.PrintInfoMessage("Type help to know the set of commands");
+
+
+

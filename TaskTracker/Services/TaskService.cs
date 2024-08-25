@@ -18,7 +18,7 @@ namespace TaskTracker.Services
         {
             try
             {
-                var task = new Models.Task
+                var task = new AppTask
                 {
                     Id = Guid.NewGuid().GetHashCode(),
                     Description = description,
@@ -31,7 +31,7 @@ namespace TaskTracker.Services
 
                 if (fileCreatedSuccessfully)
                 {
-                    string jsonString = JsonSerializer.Serialize<Models.Task>(task);
+                    string jsonString = JsonSerializer.Serialize<Models.AppTask>(task);
                     File.WriteAllText(FilePath, jsonString);
                     return Task.FromResult(true);
                 }
@@ -50,26 +50,26 @@ namespace TaskTracker.Services
             throw new NotImplementedException();
         }
 
-        public Task<List<Models.Task>> GetAllTasks()
+        public Task<List<Models.AppTask>> GetAllTasks()
         {
             try
             {
                 if (!File.Exists(FilePath))
                 {
-                    return System.Threading.Tasks.Task.FromResult(new List<Models.Task>());
+                    return System.Threading.Tasks.Task.FromResult(new List<Models.AppTask>());
                 }
 
                 string jsonString = File.ReadAllText(FilePath);
 
                 if (!string.IsNullOrEmpty(jsonString))
                 {
-                    List<Models.Task> tasks = JsonSerializer.Deserialize<List<Models.Task>>(jsonString);
+                    List<Models.AppTask> tasks = JsonSerializer.Deserialize<List<Models.AppTask>>(jsonString);
                     return System.Threading.Tasks.Task.FromResult(tasks ?? []);
                 }
 
                 else
                 {
-                    return System.Threading.Tasks.Task.FromResult(new List<Models.Task>());
+                    return System.Threading.Tasks.Task.FromResult(new List<Models.AppTask>());
                 }
             }
             catch (Exception ex)
@@ -79,19 +79,35 @@ namespace TaskTracker.Services
             }
         }
 
-        public Task<List<Models.Task>> GetTaskByStatus(int status)
+        public Task<List<Models.AppTask>> GetTaskByStatus(int status)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> SetStatus(Models.Task task)
+        public Task<bool> SetStatus(Models.AppTask task)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> UpdateTask(Models.Task task)
+        public Task<bool> UpdateTask(Models.AppTask task)
         {
             throw new NotImplementedException();
+        }
+
+        public List<string> GetAllCommands()
+        {
+            return new List<string>
+            {
+                "add \" Task Description\" - To add a new task, type add with task description",
+                "update \" Task Id\" \" Task Description\" - To update a task, type update with task id and task description",
+                "delete \" Task Id\" - To delete a task, type delete with task id",
+                "mark-in-progress \" Task Id\" - To mark a task to in progress, type mark-in-progress with task id",
+                "mark-done \" Task Id\" - To mark a task to done, type mark-done with task id",
+                "list - To list all task with its current status",
+                "list done - To list all task with done status",
+                "list todo  - To list all task with todo status",
+                "list in-progress  - To list all task with in-progress status"
+            };
         }
 
         #region Helper Methods
