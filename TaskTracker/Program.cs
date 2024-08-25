@@ -43,6 +43,10 @@ while (true)
             DeleteTask();
             break;
 
+        case "update":
+            UpdateTask();
+            break;
+
         case "exit":
             exit = true;
             break;
@@ -58,6 +62,33 @@ while (true)
 
 }
 
+void UpdateTask()
+{
+    if (!IsUserInputValid(commands, 3))
+    {
+        return;
+    }
+
+    int id = IsValidIdProvided(commands, 0).Item2;
+
+
+    if (id == 0)
+    {
+        return;
+    }
+
+    var result = _taskService?.UpdateTask(id, commands[2]).Result;
+
+    if (result != null && result.Value)
+    {
+        Utility.PrintInfoMessage($"Task updated successfully with Id : {id}");
+    }
+    else
+    {
+        Utility.PrintInfoMessage($"Task with Id : {id}, does not exist!");
+    }
+}
+
 void DeleteTask()
 {
     if (!IsUserInputValid(commands, 2))
@@ -65,12 +96,9 @@ void DeleteTask()
         return;
     }
 
-    Int32.TryParse(commands[1], out int id);
+    int id = IsValidIdProvided(commands, 0).Item2;
 
-    if (id == 0)
-    {
-        Utility.PrintErrorMessage("Wrong command! Try again.");
-        Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
+    if (id == 0) {
         return;
     }
 
@@ -122,12 +150,39 @@ static void ConfigureServices(IServiceCollection services)
 
 static bool IsUserInputValid(List<string> commands , int parameterRequired)
 {
-    if (commands.Count != parameterRequired || string.IsNullOrEmpty(commands[1]))
+    if (parameterRequired == 2)
     {
-        Utility.PrintErrorMessage("Wrong command! Try again.");
-        Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
-        return false;
+        if (commands.Count != parameterRequired || string.IsNullOrEmpty(commands[1]))
+        {
+            Utility.PrintErrorMessage("Wrong command! Try again.");
+            Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
+            return false;
+        }
+    }
+
+    if (parameterRequired == 3)
+    {
+        if (commands.Count != parameterRequired || string.IsNullOrEmpty(commands[1]) || string.IsNullOrEmpty(commands[2]))
+        {
+            Utility.PrintErrorMessage("Wrong command! Try again.");
+            Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
+            return false;
+        }
     }
 
     return true;
+}
+
+static Tuple<bool, int> IsValidIdProvided(List<string> commands, int id)
+{
+    Int32.TryParse(commands[1], out id);
+
+    if (id == 0)
+    {
+        Utility.PrintErrorMessage("Wrong command! Try again.");
+        Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
+        return new Tuple<bool, int>(false, id);
+    }
+
+    return new Tuple<bool, int>(true, id);
 }

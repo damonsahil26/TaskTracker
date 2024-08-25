@@ -152,14 +152,44 @@ namespace TaskTracker.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> SetStatus(Models.AppTask task)
+        public Task<bool> SetStatus(AppTask task)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> UpdateTask(Models.AppTask task)
+        public Task<bool> UpdateTask(int id, string description)
         {
-            throw new NotImplementedException();
+            if (!File.Exists(FilePath))
+            {
+                return Task.FromResult(false);
+            }
+
+            var tasksFromJson = GetTasksFromJson();
+
+            if (tasksFromJson.Result.Count > 0)
+            {
+                var taskToBeUpdated = tasksFromJson.Result
+                    .Where(x => x.Id == id)
+                    .SingleOrDefault();
+
+                if (taskToBeUpdated != null)
+                {
+                    var updatedTask = new AppTask{
+                        Id = id,
+                        Description = description,
+                        CreatedAt = taskToBeUpdated.CreatedAt,
+                        UpdatedAt = DateTime.UtcNow,
+                        TaskStatus = taskToBeUpdated.TaskStatus
+                    };
+
+                    tasksFromJson.Result.Remove(taskToBeUpdated);
+                    tasksFromJson.Result.Add(updatedTask);
+                    UpdateJsonFile(tasksFromJson);
+                    return Task.FromResult(true);
+                }
+            }
+
+            return Task.FromResult(false);
         }
 
         public List<string> GetAllHelpCommands()

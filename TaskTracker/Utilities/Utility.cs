@@ -62,5 +62,12 @@ namespace TaskTracker.Utilities
 
             return commandArgs;
         }
+
+        public static bool IsStringQuoted(string input, string argument)
+        {
+            // Check if the argument is enclosed in double quotes within the original input
+            var quotedRegex = new Regex($"\"{Regex.Escape(argument)}\"");
+            return quotedRegex.IsMatch(input);
+        }
     }
 }
