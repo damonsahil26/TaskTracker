@@ -72,7 +72,7 @@ Task Id          Description                         Status          Created Dat
 Enter command : mark-in-progress 1
 Task status set successfully with Id : 1
 
-Enter command : list
+Enter command : list in-progress
 Task Id          Description                         Status          Created Date    
 1               Finish the report                   in-progress      25-08-2024
 
