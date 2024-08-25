@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
+using TaskTracker.Enums;
 using TaskTracker.Interfaces;
 using TaskTracker.Models;
 
@@ -13,6 +14,7 @@ namespace TaskTracker.Services
     public class TaskService : ITaskService
     {
         private static string FileName = "task_data.json";
+
         private static string FilePath = Path.Combine(Directory.GetCurrentDirectory(), FileName);
         public Task<int> AddNewTask(string description)
         {
@@ -152,9 +154,54 @@ namespace TaskTracker.Services
             throw new NotImplementedException();
         }
 
-        public Task<bool> SetStatus(AppTask task)
+        public Task<bool> SetStatus(string status, int id)
         {
-            throw new NotImplementedException();
+            if (!File.Exists(FilePath))
+            {
+                return Task.FromResult(false);
+            }
+
+            var tasksFromJson = GetTasksFromJson();
+
+            if (tasksFromJson.Result.Count > 0)
+            {
+                var taskToBeUpdated = tasksFromJson.Result
+                    .Where(x => x.Id == id)
+                    .SingleOrDefault();
+
+                if (taskToBeUpdated != null)
+                {
+                    var updatedTask = new AppTask
+                    {
+                        Id = id,
+                        Description = taskToBeUpdated.Description,
+                        CreatedAt = taskToBeUpdated.CreatedAt,
+                        UpdatedAt = DateTime.UtcNow,
+                        TaskStatus = GetStatusToSet(status)
+                    };
+
+                    tasksFromJson.Result.Remove(taskToBeUpdated);
+                    tasksFromJson.Result.Add(updatedTask);
+                    UpdateJsonFile(tasksFromJson);
+                    return Task.FromResult(true);
+                }
+            }
+
+            return Task.FromResult(false);
+        }
+
+        private Status GetStatusToSet(string status)
+        {
+            switch (status) {
+                case "mark-in-progress":
+                    return Status.in_progress;
+                case "mark-done":
+                    return Status.done;
+                case "mark-todo":
+                    return Status.todo;
+                default:
+                    return Status.todo;
+            }
         }
 
         public Task<bool> UpdateTask(int id, string description)
@@ -233,7 +280,6 @@ namespace TaskTracker.Services
                 return false;
             }
         }
-
         #endregion
     }
 }

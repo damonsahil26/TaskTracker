@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 using TaskTracker.Interfaces;
+using TaskTracker.Models;
 using TaskTracker.Services;
 using TaskTracker.Utilities;
 
@@ -46,10 +47,26 @@ while (true)
             UpdateTask();
             break;
 
+        case "list":
+            DisplayAllTasks();
+            break;
+
         case "clear":
             Utility.ClearConsole();
             DisplayWelcomeMessage();
             continue;
+
+        case "mark-in-progress":
+            SetStatusOfTask();
+            break;
+
+        case "mark-todo":
+            SetStatusOfTask();
+            break;
+
+        case "mark-done":
+            SetStatusOfTask();
+            break;
 
         case "exit":
             exit = true;
@@ -64,6 +81,67 @@ while (true)
         break;
     }
 
+}
+
+void SetStatusOfTask()
+{
+    if (!IsUserInputValid(commands, 2))
+    {
+        return;
+    }
+
+    int id = IsValidIdProvided(commands, 0).Item2;
+
+
+    if (id == 0)
+    {
+        return;
+    }
+
+    var result = _taskService?.SetStatus(commands[0] ,id).Result;
+
+    if (result != null && result.Value)
+    {
+        Utility.PrintInfoMessage($"Task status set successfully with Id : {id}");
+    }
+    else
+    {
+        Utility.PrintInfoMessage($"Task with Id : {id}, does not exist!");
+    }
+
+}
+
+void DisplayAllTasks()
+{
+    if (!IsUserInputValid(commands, 1))
+    {
+        return;
+    }
+    
+    var tasks = _taskService?.GetAllTasks().Result.OrderBy(x=>x.Id).ToList();
+    int colWidth1 = 15, colWidth2 = 35, colWidth3 = 15, colWidth4 = 15;
+    if (tasks != null && tasks.Count > 0)
+    {
+        Console.WriteLine("\n{0,-" + colWidth1 + "} {1,-" + colWidth2 + "} {2,-" + colWidth3 + "} {3,-" + colWidth4 + "}",
+            "Task Id", "Description", "Status", "Created Date" + "\n");
+        
+        foreach (var task in tasks)
+        {
+            SetConsoleTextColor(task);
+            Console.WriteLine("{0,-" + colWidth1 + "} {1,-" + colWidth2 + "} {2,-" + colWidth3 + "} {3,-" + colWidth4 + "}"
+                , task.Id, task.Description, task.TaskStatus, task.CreatedAt.Date.ToString("dd-MM-yyyy"));
+            Console.ResetColor();
+        }
+    }
+    else
+    {
+        Console.ForegroundColor= ConsoleColor.Red;
+        Console.WriteLine("\n No Task exists! \n");
+        Console.ResetColor();
+
+        Console.WriteLine("{0,-" + colWidth1 + "} {1,-" + colWidth2 + "} {2,-" + colWidth3 + "} {3,-" + colWidth4 + "}",
+           "Task Id", "Description", "Status", "CreatedDate");
+    }
 }
 
 void UpdateTask()
@@ -134,7 +212,6 @@ void AddNewTask()
         Utility.PrintInfoMessage("Task not saved!");
 }
 
-
 void PrintHelpCommands()
 {
     var helpCommands = _taskService?.GetAllHelpCommands();
@@ -157,13 +234,21 @@ static void ConfigureServices(IServiceCollection services)
 
 static bool IsUserInputValid(List<string> commands, int parameterRequired)
 {
+    bool validInput = true;
+
+    if (parameterRequired == 1)
+    {
+        if (commands.Count != parameterRequired)
+        {
+            validInput = false;
+        }
+    }
+
     if (parameterRequired == 2)
     {
         if (commands.Count != parameterRequired || string.IsNullOrEmpty(commands[1]))
         {
-            Utility.PrintErrorMessage("Wrong command! Try again.");
-            Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
-            return false;
+            validInput = false;
         }
     }
 
@@ -171,10 +256,16 @@ static bool IsUserInputValid(List<string> commands, int parameterRequired)
     {
         if (commands.Count != parameterRequired || string.IsNullOrEmpty(commands[1]) || string.IsNullOrEmpty(commands[2]))
         {
-            Utility.PrintErrorMessage("Wrong command! Try again.");
-            Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
-            return false;
+            validInput = false;
         }
+    }
+
+    if (!validInput)
+    {
+
+        Utility.PrintErrorMessage("Wrong command! Try again.");
+        Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
+        return false;
     }
 
     return true;
@@ -198,4 +289,20 @@ static void DisplayWelcomeMessage()
 {
     Utility.PrintInfoMessage("Hello, Welcome to Task Tracker!");
     Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
+}
+
+static void SetConsoleTextColor(AppTask task)
+{
+    if (task.TaskStatus == TaskTracker.Enums.Status.todo)
+    {
+        Console.ForegroundColor = ConsoleColor.Magenta;
+    }
+    else if (task.TaskStatus == TaskTracker.Enums.Status.done)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+    }
+    else
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+    }
 }
