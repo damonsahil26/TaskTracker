@@ -14,7 +14,7 @@ namespace TaskTracker.Interfaces
         Task<bool> UpdateTask(int id, string description);
         Task<bool> DeleteTask(int id);
         Task<bool> SetStatus(string status, int id);
-        Task<List<AppTask>> GetTaskByStatus(int status);
+        Task<List<AppTask>> GetTaskByStatus(string status);
         List<string> GetAllHelpCommands();
     }
 }

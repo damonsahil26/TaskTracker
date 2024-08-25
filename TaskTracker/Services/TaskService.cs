@@ -120,7 +120,7 @@ namespace TaskTracker.Services
             return Task.FromResult(new List<AppTask>());
         }
 
-        public Task<List<Models.AppTask>> GetAllTasks()
+        public Task<List<AppTask>> GetAllTasks()
         {
             try
             {
@@ -149,9 +149,34 @@ namespace TaskTracker.Services
             }
         }
 
-        public Task<List<Models.AppTask>> GetTaskByStatus(int status)
+        public Task<List<AppTask>> GetTaskByStatus(string status)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (!File.Exists(FilePath))
+                {
+                    return Task.FromResult(new List<Models.AppTask>());
+                }
+
+                string jsonString = File.ReadAllText(FilePath);
+
+                if (!string.IsNullOrEmpty(jsonString))
+                {
+                    var tasks = JsonSerializer.Deserialize<List<AppTask>>(jsonString);
+                    var statusToCheck = GetStatusToDisplay(status);
+                    return Task.FromResult(tasks?.Where(x=>x.TaskStatus == statusToCheck).ToList() ?? []);
+                }
+
+                else
+                {
+                    return Task.FromResult(new List<Models.AppTask>());
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
         public Task<bool> SetStatus(string status, int id)
@@ -204,6 +229,20 @@ namespace TaskTracker.Services
             }
         }
 
+        private Status GetStatusToDisplay(string status)
+        {
+            switch (status)
+            {
+                case "in-progress":
+                    return Status.in_progress;
+                case "done":
+                    return Status.done;
+                case "todo":
+                    return Status.todo;
+                default:
+                    return Status.todo;
+            }
+        }
         public Task<bool> UpdateTask(int id, string description)
         {
             if (!File.Exists(FilePath))

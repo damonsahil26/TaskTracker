@@ -113,18 +113,39 @@ void SetStatusOfTask()
 
 void DisplayAllTasks()
 {
-    if (!IsUserInputValid(commands, 1))
+    if (commands.Count > 2)
     {
+        Utility.PrintErrorMessage("Wrong command! Try again.");
+        Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
         return;
     }
-    
-    var tasks = _taskService?.GetAllTasks().Result.OrderBy(x=>x.Id).ToList();
+
+    List<AppTask> tasks = new List<AppTask>();
+    if (commands.Count == 1)
+    {
+        tasks = _taskService?.GetAllTasks().Result.OrderBy(x => x.Id).ToList() ?? tasks;
+    }
+    else
+    {
+        if (!commands[1].ToLower().Equals("in-progress") && !commands[1].ToLower().Equals("done") && !commands[1].ToLower().Equals("todo"))
+        {
+            Utility.PrintErrorMessage("Wrong command! Try again.");
+            Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
+            return;
+        }
+        tasks = _taskService?.GetTaskByStatus(commands[1]).Result.OrderBy(x => x.Id).ToList() ?? tasks;
+    }
+
+    CreateTaskTable(tasks);
+}
+static void CreateTaskTable(List<AppTask> tasks)
+{
     int colWidth1 = 15, colWidth2 = 35, colWidth3 = 15, colWidth4 = 15;
     if (tasks != null && tasks.Count > 0)
     {
         Console.WriteLine("\n{0,-" + colWidth1 + "} {1,-" + colWidth2 + "} {2,-" + colWidth3 + "} {3,-" + colWidth4 + "}",
             "Task Id", "Description", "Status", "Created Date" + "\n");
-        
+
         foreach (var task in tasks)
         {
             SetConsoleTextColor(task);
@@ -135,7 +156,7 @@ void DisplayAllTasks()
     }
     else
     {
-        Console.ForegroundColor= ConsoleColor.Red;
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("\n No Task exists! \n");
         Console.ResetColor();
 
@@ -143,7 +164,6 @@ void DisplayAllTasks()
            "Task Id", "Description", "Status", "CreatedDate");
     }
 }
-
 void UpdateTask()
 {
     if (!IsUserInputValid(commands, 3))
