@@ -33,7 +33,7 @@ namespace TaskTracker.Utilities
         public static void PrintCommandMessage(string message)
         {
             Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.WriteLine("\n" + message);
+            Console.WriteLine("\n" + message + "\n");
             Console.ResetColor();
         }
 
@@ -63,11 +63,9 @@ namespace TaskTracker.Utilities
             return commandArgs;
         }
 
-        public static bool IsStringQuoted(string input, string argument)
+        public static void ClearConsole()
         {
-            // Check if the argument is enclosed in double quotes within the original input
-            var quotedRegex = new Regex($"\"{Regex.Escape(argument)}\"");
-            return quotedRegex.IsMatch(input);
+            Console.Clear(); 
         }
     }
 }

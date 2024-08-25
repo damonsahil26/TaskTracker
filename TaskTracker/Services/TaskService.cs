@@ -205,7 +205,8 @@ namespace TaskTracker.Services
                 "list done - To list all task with done status",
                 "list todo  - To list all task with todo status",
                 "list in-progress  - To list all task with in-progress status",
-                "exit - To exit from app"
+                "exit - To exit from app",
+                "clear - To clear console window"
             };
         }
 

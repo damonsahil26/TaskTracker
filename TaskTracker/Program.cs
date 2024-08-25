@@ -9,8 +9,7 @@ ConfigureServices(serviceCollection);
 var serviceProvider = serviceCollection.BuildServiceProvider();
 var _taskService = serviceProvider.GetService<ITaskService>();
 
-Utility.PrintInfoMessage("Hello, Welcome to Task Tracker!");
-Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
+DisplayWelcomeMessage();
 List<string> commands = [];
 while (true)
 {
@@ -46,6 +45,11 @@ while (true)
         case "update":
             UpdateTask();
             break;
+
+        case "clear":
+            Utility.ClearConsole();
+            DisplayWelcomeMessage();
+            continue;
 
         case "exit":
             exit = true;
@@ -98,7 +102,8 @@ void DeleteTask()
 
     int id = IsValidIdProvided(commands, 0).Item2;
 
-    if (id == 0) {
+    if (id == 0)
+    {
         return;
     }
 
@@ -116,7 +121,7 @@ void DeleteTask()
 
 void AddNewTask()
 {
-    if(!IsUserInputValid(commands, 2))
+    if (!IsUserInputValid(commands, 2))
     {
         return;
     }
@@ -133,11 +138,13 @@ void AddNewTask()
 void PrintHelpCommands()
 {
     var helpCommands = _taskService?.GetAllHelpCommands();
+    int count = 1;
     if (helpCommands != null)
     {
         foreach (var item in helpCommands)
         {
-           Utility.PrintHelpMessage(item);
+            Utility.PrintHelpMessage(count + ". " + item);
+            count++;
         }
     }
 }
@@ -148,7 +155,7 @@ static void ConfigureServices(IServiceCollection services)
     services.AddSingleton<ITaskService, TaskService>();
 }
 
-static bool IsUserInputValid(List<string> commands , int parameterRequired)
+static bool IsUserInputValid(List<string> commands, int parameterRequired)
 {
     if (parameterRequired == 2)
     {
@@ -185,4 +192,10 @@ static Tuple<bool, int> IsValidIdProvided(List<string> commands, int id)
     }
 
     return new Tuple<bool, int>(true, id);
+}
+
+static void DisplayWelcomeMessage()
+{
+    Utility.PrintInfoMessage("Hello, Welcome to Task Tracker!");
+    Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
 }
