@@ -11,10 +11,10 @@ var _taskService = serviceProvider.GetService<ITaskService>();
 
 Utility.PrintInfoMessage("Hello, Welcome to Task Tracker!");
 Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
-
+List<string> commands = [];
 while (true)
 {
-    Utility.PrintInfoMessage("Enter command : ");
+    Utility.PrintCommandMessage("Enter command : ");
     string input = Console.ReadLine() ?? string.Empty;
 
     if (string.IsNullOrEmpty(input))
@@ -23,7 +23,7 @@ while (true)
         continue;
     }
 
-    string[] commands = input.Trim().Split(' ');
+    commands = Utility.ParseInput(input);
 
     string command = commands[0].ToLower();
 
@@ -33,6 +33,9 @@ while (true)
     {
         case "help":
             PrintHelpCommands();
+            break;
+        case "add":
+            AddNewTask();
             break;
         case "exit":
             exit = true;
@@ -48,6 +51,24 @@ while (true)
     }
 
 }
+
+void AddNewTask()
+{
+    if (commands.Count != 2 || string.IsNullOrEmpty(commands[1]))
+    {
+        Utility.PrintErrorMessage("Wrong command! Try again.");
+        Utility.PrintInfoMessage("Type \"help\" to know the set of commands");
+        return;
+    }
+
+    var taskAdded = _taskService?.AddNewTask(commands[1]);
+
+    if (taskAdded != null && taskAdded.Result != 0)
+         Utility.PrintInfoMessage($"Task added successfully with Id : {taskAdded.Result}!");
+    else
+        Utility.PrintInfoMessage("Task not saved!");
+}
+
 
 void PrintHelpCommands()
 {

@@ -14,13 +14,14 @@ namespace TaskTracker.Services
     {
         private static string FileName = "task_data.json";
         private static string FilePath = Path.Combine(Directory.GetCurrentDirectory(), FileName);
-        public Task<bool> AddNewTask(string description)
+        public Task<int> AddNewTask(string description)
         {
             try
             {
+                var appTasks = new List<AppTask>();
                 var task = new AppTask
                 {
-                    Id = Guid.NewGuid().GetHashCode(),
+                    Id = GetTaskId(),
                     Description = description,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
@@ -31,18 +32,47 @@ namespace TaskTracker.Services
 
                 if (fileCreatedSuccessfully)
                 {
-                    string jsonString = JsonSerializer.Serialize<Models.AppTask>(task);
-                    File.WriteAllText(FilePath, jsonString);
-                    return Task.FromResult(true);
+                    string tasksFromJsonFileString = File.ReadAllText(FilePath);
+                    if (!string.IsNullOrEmpty(tasksFromJsonFileString))
+                    {
+                        appTasks = JsonSerializer.Deserialize<List<AppTask>>(tasksFromJsonFileString);
+                    }
+
+                    appTasks?.Add(task);
+                    string updatedAppTasks = JsonSerializer.Serialize<List<AppTask>>(appTasks ?? new List<AppTask>());
+                    File.WriteAllText(FilePath, updatedAppTasks);
+                    return Task.FromResult(task.Id);
                 }
 
-                return Task.FromResult(false);
+                return Task.FromResult(0);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Task addition failed. Error - " + ex.Message);
-                return Task.FromResult(false);
+                return Task.FromResult(0);
             }
+        }
+
+        private int GetTaskId()
+        {
+            if (!File.Exists(FilePath))
+            {
+                return 1;
+            }
+
+            else
+            {
+                string tasksFromJsonFileString = File.ReadAllText(FilePath);
+                if (!string.IsNullOrEmpty(tasksFromJsonFileString))
+                {
+                    var appTasks = JsonSerializer.Deserialize<List<AppTask>>(tasksFromJsonFileString);
+                    if (appTasks != null && appTasks.Count > 0) {
+                       return appTasks.OrderBy(x => x.Id).Last().Id + 1;
+                    }
+                }
+            }
+
+            return 1;
         }
 
         public Task<bool> DeleteTask(int id)
@@ -99,7 +129,7 @@ namespace TaskTracker.Services
             return new List<string>
             {
                 "add \"Task Description\" - To add a new task, type add with task description",
-                "update \"Task Id\" \" Task Description\" - To update a task, type update with task id and task description",
+                "update \"Task Id\" \"Task Description\" - To update a task, type update with task id and task description",
                 "delete \"Task Id\" - To delete a task, type delete with task id",
                 "mark-in-progress \"Task Id\" - To mark a task to in progress, type mark-in-progress with task id",
                 "mark-done \"Task Id\" - To mark a task to done, type mark-done with task id",

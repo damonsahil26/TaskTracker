@@ -9,7 +9,7 @@ namespace TaskTracker.Interfaces
     public interface ITaskService
     {
         Task<List<Models.AppTask>> GetAllTasks();
-        Task<bool> AddNewTask(string description);
+        Task<int> AddNewTask(string description);
         Task<bool> UpdateTask(Models.AppTask task);
         Task<bool> DeleteTask(int id);
         Task<bool> SetStatus(Models.AppTask task);
